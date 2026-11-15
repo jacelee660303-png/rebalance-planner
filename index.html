@@ -16,6 +16,7 @@
   --buy: #c8372d; --buy-wash: #fbecea; --sell: #1f64c8; --sell-wash: #e9f0fb;
   --warn: #9a5b00; --warn-wash: #fdf2dc; --bad: #b3261e; --bad-wash: #fbe9e7;
   --cur: #2a78d6; --tgt: #eb6834;
+  --keep: #118f5c; --keep-wash: #e3f3e9; --exit: #2a78d6; --exit-wash: #e6effc; --new: #eb6834; --new-wash: #fdece2;
   --r: 10px;
 }
 * { box-sizing: border-box; }
@@ -93,6 +94,48 @@ table.t input[type=checkbox] { width: 16px; height: 16px; accent-color: var(--se
 .pos { color: var(--buy); font-weight: 600; } .neg { color: var(--sell); font-weight: 600; }
 .x { border: 0; background: none; color: var(--ink-3); cursor: pointer; font-size: 16px; line-height: 1; padding: 2px 6px; border-radius: 4px; }
 .x:hover { color: var(--bad); background: var(--bad-wash); }
+
+/* 보유 상태별 행 색상: 잔고·목표와 단계 이동에서 같은 색 */
+table.t tr.rk-keep > td:not(.sec) { background: var(--keep-wash); }
+table.t tr.rk-exit > td:not(.sec) { background: var(--exit-wash); }
+table.t tr.rk-new > td:not(.sec) { background: var(--new-wash); }
+table.t tr.rk-keep > td.nm { box-shadow: inset 4px 0 0 var(--keep); }
+table.t tr.rk-exit > td.nm { box-shadow: inset 4px 0 0 var(--exit); }
+table.t tr.rk-new > td.nm { box-shadow: inset 4px 0 0 var(--new); }
+table.t tr[class^="rk-"] > td { border-bottom-color: var(--surface); }
+table.t tr[class^="rk-"] > td.nm { padding-left: 14px; }
+.kd { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: var(--ink-2); white-space: nowrap; }
+.kd i { width: 9px; height: 9px; border-radius: 2px; flex: none; }
+.kd.keep i { background: var(--keep); } .kd.exit i { background: var(--exit); } .kd.new i { background: var(--new); }
+.kd-legend { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 0 0 12px; font-size: 12.5px; color: var(--ink-2); }
+.kd-legend .t { font-weight: 700; color: var(--ink); margin-right: 4px; }
+.kd-legend .lg { display: inline-flex; align-items: baseline; gap: 7px; padding: 5px 12px 5px 14px; border-radius: 6px; }
+.kd-legend .lg b, .kd-legend .lg em { color: var(--ink); font-style: normal; font-weight: 700; }
+.kd-legend .lg.keep { background: var(--keep-wash); box-shadow: inset 4px 0 0 var(--keep); }
+.kd-legend .lg.exit { background: var(--exit-wash); box-shadow: inset 4px 0 0 var(--exit); }
+.kd-legend .lg.new { background: var(--new-wash); box-shadow: inset 4px 0 0 var(--new); }
+.card > .kd-legend { margin: 0; padding: 10px 14px; border-bottom: 1px solid var(--line-2); }
+
+/* 회차 수 선택 */
+.seg-row { display: flex; align-items: center; gap: 8px 14px; flex-wrap: wrap; padding: 12px 14px; border-bottom: 1px solid var(--line-2); }
+.seg-row .lab { font-weight: 700; font-size: 13.5px; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--surface); }
+.seg button { border: 0; border-left: 1px solid var(--line); background: none; min-width: 38px; padding: 6px 0; cursor: pointer; font-weight: 700; font-size: 13.5px; color: var(--ink-2); }
+.seg button:first-child { border-left: 0; }
+.seg button:hover:not(:disabled):not([aria-pressed="true"]) { background: var(--sunk); color: var(--ink); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: #fff; }
+.seg button:disabled { color: #b9c5cd; cursor: default; }
+.seg button:focus-visible { outline-offset: -2px; }
+
+/* 회차별 매매 수량표 */
+table.t.sch th span { display: block; font-weight: 500; font-size: 11px; }
+table.t.sch th.now { color: var(--ink); } table.t.sch th.now span { color: var(--sea); font-weight: 700; }
+table.t.sch th.dn span { color: var(--sea); }
+table.t tr.grp > td { background: var(--sunk); font-weight: 700; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+table.t.sch tbody tr.grp:first-child > td { border-top: 0; }
+table.t.ord td b.neg, table.t.ord td b.pos { font-weight: 700; }
+table.t.sch td.nm { position: sticky; left: 0; z-index: 1; background: var(--surface); }
+table.t.sch th:first-child { position: sticky; left: 0; z-index: 2; }
 
 .tag { display: inline-block; padding: 1px 8px; border-radius: 99px; font-size: 12px; font-weight: 700; }
 .tag.S { color: var(--sell); background: var(--sell-wash); } .tag.B { color: var(--buy); background: var(--buy-wash); } .tag.H { color: var(--warn); background: var(--warn-wash); }
@@ -188,8 +231,10 @@ dialog::backdrop { background: rgba(16,34,44,.45); }
   .grid2 { grid-template-columns: minmax(0, 1fr); }
   .wrap { padding: 0 12px 48px; }
 }
+@media (max-width: 720px) { table.t.sch td.nm, table.t.ord td.nm { min-width: 128px; max-width: 150px; } }
+@media (max-width: 480px) { .seg button { min-width: 29px; } }
 @media (prefers-reduced-motion: reduce) { #toast { transition: none; } }
-@media print { .top .btn, .tabs, .acc-foot, .x { display: none !important; } body { background: #fff; } }
+@media print { .top .btn, .tabs, .acc-foot, .x { display: none !important; } body { background: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
 </style>
 </head>
 <body>
@@ -233,6 +278,11 @@ dialog::backdrop { background: rgba(16,34,44,.45); }
   function xround(x) { return (x < 0 ? -1 : 1) * Math.round(Math.abs(x)); }
   function clamp(x, a, b) { return Math.max(a, Math.min(b, x)); }
   function uid() { return 'a' + Math.random().toString(36).slice(2, 9); }
+  /* 보유 상태: keep=지금 보유·최종에도 보유, exit=지금 보유·최종 목표 0%, new=지금 없음·최종에 보유 */
+  function rowKind(qty, target) {
+    var has = num(qty) > 0, want = num(target) > 0;
+    return has && want ? 'keep' : (has ? 'exit' : (want ? 'new' : ''));
+  }
 
   function normCode(v) {
     if (v == null) return '';
@@ -306,12 +356,13 @@ dialog::backdrop { background: rgba(16,34,44,.45); }
         name: displayName(state, r.code),
         safe: isCash || !!(t && t.safe),
         price: price, qty: qty, target: num(r.target),
+        kind: isCash ? '' : rowKind(qty, r.target),
         value: price != null ? price * qty : null,
         ord: isCash ? 1e9 : (order[r.code] != null ? order[r.code] : 1e8)
       };
     });
     if (deposit && !rows.some(function (r) { return r.isCash; })) {
-      rows.push({ i: -1, code: CASH, isCash: true, sector: '현금성', name: '예수금(현금)', safe: true, price: 1, qty: deposit, target: 0, value: deposit, ord: 1e9 });
+      rows.push({ i: -1, code: CASH, isCash: true, sector: '현금성', name: '예수금(현금)', safe: true, price: 1, qty: deposit, target: 0, kind: '', value: deposit, ord: 1e9 });
     }
     var total = 0, sumTarget = 0, missing = false;
     rows.forEach(function (r) {
@@ -475,7 +526,11 @@ dialog::backdrop { background: rgba(16,34,44,.45); }
     res.riskAfter = total2 > 0 ? risk2 / total2 * 100 : 0;
     var wAfter = {};
     res.after.forEach(function (a) { wAfter[a.code] = a.w; });
-    res.orders.forEach(function (o) { o.curW = o.row.curW; o.aftW = wAfter[o.code]; o.tgtW = o.row.target / 100; delete o.row; });
+    res.orders.forEach(function (o) {
+      o.curW = o.row.curW; o.aftW = wAfter[o.code]; o.tgtW = o.row.target / 100;
+      o.have = o.row.qty; o.left = o.row.qty + (delta[o.code] || 0);   // 회차 전·후 보유 주식 수
+      delete o.row;
+    });
     return res;
   }
 
@@ -513,6 +568,60 @@ dialog::backdrop { background: rgba(16,34,44,.45); }
       out.push(item);
     });
     return out;
+  }
+
+  /* 회차별 매매 수량표: 계좌·종목마다 회차별 주식 수(매수 +, 매도 −).
+     완료한 회차는 이력의 실제 체결 수량, 남은 회차는 현재가 기준 예상 수량 */
+  function schedule(state, sim) {
+    sim = sim || simulate(state);
+    var entryOf = function (rd, k) {
+      var found = null;
+      (state.history || []).forEach(function (e) {
+        if (rd.doneId ? e.id === rd.doneId : (e.at === rd.doneAt && e.round === k + 1)) found = e;
+      });
+      return found;
+    };
+    return state.accounts.map(function (acc, ai) {
+      var c = calcAccount(state, acc), rows = [], by = {};
+      c.rows.forEach(function (r) {
+        if (r.isCash) return;
+        var x = { code: r.code, name: r.name, sector: r.sector, kind: r.kind, qty: r.qty, target: r.target, cells: [], end: r.qty, any: false };
+        rows.push(x); by[r.code] = x;
+      });
+      state.plan.rounds.forEach(function (rd, k) {
+        rows.forEach(function (x) { x.cells.push(null); });
+        if (rd.done) {
+          var e = entryOf(rd, k);
+          if (!e) return;
+          e.accounts.forEach(function (a) {
+            if (a.accId !== acc.id) return;
+            (a.trades || []).forEach(function (t) {
+              var x = by[t.code];
+              if (!x) return;
+              var cell = x.cells[k] || (x.cells[k] = { q: 0, done: true });
+              cell.q += (t.side === 'S' ? -1 : 1) * num(t.qty);
+              x.any = true;
+            });
+          });
+          return;
+        }
+        var it = sim[k] && sim[k].accounts[ai];
+        if (!it || !it.plan.ok) return;
+        it.plan.orders.forEach(function (o) {
+          var x = by[o.code];
+          if (!x) return;
+          x.any = true;
+          if (o.held) { x.cells[k] = { q: 0, held: true, side: o.side }; return; }
+          var q = (o.side === 'S' ? -1 : 1) * o.qty;
+          x.cells[k] = { q: q };
+          x.end += q;
+        });
+      });
+      return {
+        id: acc.id, name: acc.name, ok: c.total > 0 && c.targetOk, total: c.total,
+        rows: rows.filter(function (x) { return x.any || x.kind; })
+      };
+    });
   }
 
   function setBaseline(state) {
@@ -555,7 +664,7 @@ dialog::backdrop { background: rgba(16,34,44,.45); }
       cashRow.qty = Math.round(cash);
       entry.accounts.push({ accId: acc.id, name: acc.name, deposit: num(f.deposit), trades: log, cashAfter: cashRow.qty });
     });
-    rd.done = true; rd.doneAt = entry.at;
+    rd.done = true; rd.doneAt = entry.at; rd.doneId = entry.id;
     state.history.push(entry);
     return entry;
   }
@@ -570,7 +679,7 @@ dialog::backdrop { background: rgba(16,34,44,.45); }
       acc.rows.forEach(function (r) { if (m[r.code] != null) r.qty = m[r.code]; });
     });
     var rd = state.plan.rounds[e.round - 1];
-    if (rd) { rd.done = false; delete rd.doneAt; }
+    if (rd) { rd.done = false; delete rd.doneAt; delete rd.doneId; }
     return e;
   }
 
@@ -635,7 +744,7 @@ dialog::backdrop { background: rgba(16,34,44,.45); }
     newState: newState, newPlan: newPlan, tickerOf: tickerOf, ensureCash: ensureCash,
     priceOf: priceOf, displayName: displayName,
     calcAccount: calcAccount, calcAll: calcAll, roundFrac: roundFrac, currentRound: currentRound,
-    planRound: planRound, simulate: simulate, setBaseline: setBaseline, progress: progress,
+    rowKind: rowKind, planRound: planRound, simulate: simulate, schedule: schedule, setBaseline: setBaseline, progress: progress,
     executeRound: executeRound, undoLast: undoLast, parseWorkbook: parseWorkbook
   };
 });
@@ -686,7 +795,7 @@ dialog::backdrop { background: rgba(16,34,44,.45); }
       o.plan.rounds.slice(0, 12).forEach(function (r) {
         var dep = {};
         if (r && r.deposits) Object.keys(r.deposits).forEach(function (k) { var v = Math.max(0, num(r.deposits[k])); if (v) dep[k] = v; });
-        s.plan.rounds.push({ pct: RB.clamp(num(r && r.pct), 0, 100), date: /^\d{4}-\d{2}-\d{2}$/.test(String(r && r.date)) ? r.date : '', deposits: dep, done: !!(r && r.done), doneAt: r && r.doneAt || undefined });
+        s.plan.rounds.push({ pct: RB.clamp(num(r && r.pct), 0, 100), date: /^\d{4}-\d{2}-\d{2}$/.test(String(r && r.date)) ? r.date : '', deposits: dep, done: !!(r && r.done), doneAt: r && r.doneAt || undefined, doneId: r && r.doneId ? String(r.doneId).slice(0, 24) : undefined });
       });
       fixPcts(s.plan);
     }
@@ -736,7 +845,7 @@ dialog::backdrop { background: rgba(16,34,44,.45); }
 
   var S = load();
   var ui = { tab: 'hold', round: null, depOpen: false, tkQ: '', tkSec: '' };
-  var ALL = null, SIM = null;
+  var ALL = null, SIM = null, lastTab = '';
 
   /* ---------- 표기 ---------- */
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
@@ -759,6 +868,25 @@ dialog::backdrop { background: rgba(16,34,44,.45); }
   function fDate(iso) { return iso ? new Date(iso).toLocaleString('sv-SE', { timeZone: 'Asia/Seoul', hour12: false }).slice(0, 16) : ''; }
   function stamp() { return new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Seoul', hour12: false }).replace(/[-: ]/g, '').slice(0, 12).replace(/^(\d{8})(\d{4})$/, '$1_$2'); }
   function cls(n) { return n > 0 ? 'pos' : (n < 0 ? 'neg' : 'mut'); }
+  /* 보유 상태(행 색상): 잔고·목표와 단계 이동에서 같은 구분·같은 색을 쓴다 */
+  var KINDS = [['keep', '계속 보유', '지금 보유 중 · 최종에도 보유'], ['exit', '정리 대상', '지금 보유 중 · 최종 목표 0%'], ['new', '신규 편입', '지금 없음 · 최종에 보유']];
+  function kindTag(kind) {
+    for (var i = 0; i < KINDS.length; i++) if (KINDS[i][0] === kind) return '<span class="kd ' + kind + '"><i></i>' + KINDS[i][1] + '</span>';
+    return '<span class="mut">–</span>';
+  }
+  function kindLegend() {
+    var n = { keep: 0, exit: 0, 'new': 0 };
+    ALL.accounts.forEach(function (c) { c.rows.forEach(function (r) { if (r.kind) n[r.kind]++; }); });
+    return '<div class="kd-legend" role="note" aria-label="행 색상 안내"><span class="t">행 색상</span>' + KINDS.map(function (k) {
+      return '<span class="lg ' + k[0] + '"><b>' + k[1] + '</b><em>' + n[k[0]] + '</em><span>' + k[2] + '</span></span>';
+    }).join('') + '</div>';
+  }
+  function kindMap() {
+    var m = {};
+    ALL.accounts.forEach(function (c) { var x = m[c.id] = {}; c.rows.forEach(function (r) { x[r.code] = r.kind; }); });
+    return m;
+  }
+  function ju(q) { return fInt(q) + '주'; }
   var toastTimer = null;
   function toast(msg) {
     var t = $('#toast');
@@ -939,8 +1067,13 @@ dialog::backdrop { background: rgba(16,34,44,.45); }
     SIM = RB.simulate(S);
     var a = document.activeElement, key = a && a.dataset ? a.dataset.k : null, caret = null;
     try { if (key && a.type !== 'number' && a.selectionStart != null) caret = [a.selectionStart, a.selectionEnd]; } catch (e) { caret = null; }
+    // 시세 갱신으로 다시 그려도 표를 옆으로 밀어 둔 위치는 유지
+    var boxes = lastTab === ui.tab ? document.querySelectorAll('#view .scroll') : [], sl = [].map.call(boxes, function (b) { return b.scrollLeft; });
     renderFeed(); renderKpis(); renderTabs();
     $('#view').innerHTML = VIEWS[ui.tab]();
+    lastTab = ui.tab;
+    var boxes2 = document.querySelectorAll('#view .scroll');
+    if (boxes2.length === sl.length) sl.forEach(function (x, i) { if (x) boxes2[i].scrollLeft = x; });
     if (ui.tab === 'tk' && ui.tkQ) searchTickers(ui.tkQ);
     if (key) { var el = document.querySelector('[data-k="' + key.replace(/"/g, '') + '"]'); if (el) { el.focus(); if (caret) { try { el.setSelectionRange(caret[0], caret[1]); } catch (e) { /* 선택 범위를 지원하지 않는 입력칸 */ } } } }
   }
@@ -966,15 +1099,16 @@ dialog::backdrop { background: rgba(16,34,44,.45); }
       (c.targetOk ? '<span class="badge">목표 합계 100%</span>' : '<span class="badge bad">목표 합계 ' + fP(c.sumTarget) + ' · ' + (c.sumTarget < 100 ? fP(100 - c.sumTarget) + ' 부족' : fP(c.sumTarget - 100) + ' 초과') + '</span>') +
       (acc.risk ? riskBadge(c.riskCur, c.riskTgt) : '') +
       '<button class="x" data-act="acc.del" data-a="' + ai + '" title="계좌 삭제" aria-label="계좌 삭제">×</button></header>';
-    h += '<div class="scroll"><table class="t"><thead><tr><th class="l">섹터</th><th class="l">종목</th><th>현재가</th><th>보유수량</th><th>평가금액</th><th>현재 %</th><th>목표 %</th><th>목표금액</th><th>조정(주/원)</th><th></th></tr></thead><tbody>';
+    h += '<div class="scroll"><table class="t"><thead><tr><th class="l">섹터</th><th class="l">종목</th><th class="l">구분</th><th>현재가</th><th>보유수량</th><th>평가금액</th><th>현재 %</th><th>목표 %</th><th>목표금액</th><th>조정(주/원)</th><th></th></tr></thead><tbody>';
     var groups = {};
     c.rows.forEach(function (r) { (groups[r.sector] = groups[r.sector] || []).push(r); });
     Object.keys(groups).forEach(function (sec) {
       var g = groups[sec], sx = c.sectors[sec];
       g.forEach(function (r, j) {
-        h += '<tr' + (r.isCash ? ' class="cash"' : '') + '>';
+        h += '<tr class="' + (r.isCash ? 'cash' : (r.kind ? 'rk-' + r.kind : '')) + '">';
         if (j === 0) h += '<td class="sec" rowspan="' + g.length + '"><b>' + esc(sec) + '</b><span>' + fPct(sx.curW) + ' → ' + fP(sx.tgtW) + '</span></td>';
         h += '<td class="nm">' + esc(r.name) + (r.isCash ? '' : '<span class="code">' + esc(r.code) + '</span>') + '</td>';
+        h += '<td class="l">' + (r.isCash ? '' : kindTag(r.kind)) + '</td>';
         h += '<td>' + priceCell(r) + '</td>';
         h += '<td><input class="q" type="number" min="0" step="1" inputmode="numeric" data-act="row.qty" data-a="' + ai + '" data-i="' + r.i + '" data-k="q' + ai + r.code + '" value="' + r.qty + '" aria-label="' + esc(r.name) + ' 보유수량"></td>';
         h += '<td>' + (r.value == null ? '<span class="mut">–</span>' : fInt(r.value)) + '</td>';
@@ -985,7 +1119,7 @@ dialog::backdrop { background: rgba(16,34,44,.45); }
         h += '<td class="c">' + (r.isCash ? '' : '<button class="x" data-act="row.del" data-a="' + ai + '" data-i="' + r.i + '" title="행 삭제" aria-label="' + esc(r.name) + ' 행 삭제">×</button>') + '</td></tr>';
       });
     });
-    h += '</tbody><tfoot><tr><td class="l" colspan="4">합계 (현금 포함)</td><td>' + fInt(c.total) + '</td><td>100.0%</td><td>' + fP(c.sumTarget) + '</td><td>' + fInt(c.total * c.sumTarget / 100) + '</td><td></td><td></td></tr></tfoot></table></div>';
+    h += '</tbody><tfoot><tr><td class="l" colspan="5">합계 (현금 포함)</td><td>' + fInt(c.total) + '</td><td>100.0%</td><td>' + fP(c.sumTarget) + '</td><td>' + fInt(c.total * c.sumTarget / 100) + '</td><td></td><td></td></tr></tfoot></table></div>';
     var used = {};
     acc.rows.forEach(function (r) { used[r.code] = 1; });
     var opts = '';
@@ -1008,6 +1142,7 @@ dialog::backdrop { background: rgba(16,34,44,.45); }
     var h = '';
     var missing = ALL.accounts.some(function (c) { return c.missing; });
     if (missing) h += '<div class="alert">가격을 확인하지 못한 종목이 있습니다. 시세를 새로고침하거나 종목 목록 탭에서 수동 가격을 입력하십시오. 해당 종목은 합계에서 빠져 있습니다.</div>';
+    h += kindLegend();
     S.accounts.forEach(function (acc, ai) { h += accountCard(acc, ALL.accounts[ai], ai); });
     return h + '<button class="btn" data-act="acc.add">계좌 추가</button>';
   }
@@ -1026,11 +1161,46 @@ dialog::backdrop { background: rgba(16,34,44,.45); }
       var c = r.done ? 'd' : (k === cur ? 'c' : '');
       h += '<circle class="wp ' + c + '" cx="' + x(r.pct) + '" cy="' + Y + '" r="9"/>';
       if (r.done) h += '<path d="M' + (x(r.pct) - 4) + ' ' + Y + ' l3 3 l5 -6" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
-      h += '<text class="h" x="' + x(r.pct) + '" y="' + (Y - 18) + '" text-anchor="' + (k === rs.length - 1 ? 'end' : 'middle') + '"' + (k === rs.length - 1 ? ' dx="9"' : '') + '>' + (k + 1) + (small ? '' : '회차') + (k === rs.length - 1 ? ' · 목표' : '') + '</text>';
-      h += '<text x="' + x(r.pct) + '" y="' + (Y + 30) + '" text-anchor="' + (k === rs.length - 1 ? 'end' : 'middle') + '"' + (k === rs.length - 1 ? ' dx="9"' : '') + '>' + fP(r.pct) + (r.date && !small && !narrow ? ' · ' + r.date.slice(5).replace('-', '/') : '') + '</text>';
+      var last = k === rs.length - 1, tight = small && narrow;   // 좁은 화면에 회차가 많으면 숫자만, 진행률은 다음 회차와 목표만
+      if (tight) {
+        h += '<text class="h" x="' + x(r.pct) + '" y="' + (Y - 18) + '" text-anchor="middle">' + (k + 1) + '</text>';
+        if (last) h += '<text x="' + x(r.pct) + '" y="' + (Y + 30) + '" text-anchor="end" dx="9">목표</text>';
+        else if (k === cur) h += '<text x="' + x(r.pct) + '" y="' + (Y + 30) + '" text-anchor="middle">' + fP(r.pct) + '</text>';
+        return;
+      }
+      h += '<text class="h" x="' + x(r.pct) + '" y="' + (Y - 18) + '" text-anchor="' + (last ? 'end' : 'middle') + '"' + (last ? ' dx="9"' : '') + '>' + (k + 1) + (small ? '' : '회차') + (last ? ' · 목표' : '') + '</text>';
+      h += '<text x="' + x(r.pct) + '" y="' + (Y + 30) + '" text-anchor="' + (last ? 'end' : 'middle') + '"' + (last ? ' dx="9"' : '') + '>' + fP(r.pct) + (r.date && !small && !narrow ? ' · ' + r.date.slice(5).replace('-', '/') : '') + '</text>';
     });
     h += '<path class="ship" transform="translate(' + x(pr.pct) + ',' + Y + ')" d="M0 -9 L8 8 L0 4 L-8 8 Z"/>';
     return h + '</svg>';
+  }
+  function scheduleCard(cur) {
+    var rs = S.plan.rounds, SCH = RB.schedule(S, SIM), cols = rs.length + 4;
+    var h = '<section class="card" id="schCard"><header><h2>회차별 매도·매수 주식 수</h2><span class="meta">전체 일정 · 단위 주 · 매도는 −, 매수는 + · 완료한 회차는 실제 체결 수량</span></header>' + kindLegend() +
+      '<div class="scroll"><table class="t sch"><thead><tr><th class="l">종목</th><th class="l">구분</th><th>지금 보유</th>';
+    rs.forEach(function (r, i) {
+      h += '<th class="' + (r.done ? 'dn' : (i === cur ? 'now' : '')) + '">' + (i + 1) + '회차<span>' + (r.done ? '완료' : (i === cur ? '다음 차례 · ' : '') + fP(r.pct)) + '</span></th>';
+    });
+    h += '<th>일정 후 보유</th></tr></thead><tbody>';
+    SCH.forEach(function (a) {
+      h += '<tr class="grp"><td class="l" colspan="' + cols + '">' + esc(a.name) + (a.ok ? '' : ' <span class="badge ' + (a.total > 0 ? 'bad' : 'mut') + '">' + (a.total > 0 ? '목표 합계가 100%가 아니어서 계산하지 않음' : '잔고 없음') + '</span>') + '</td></tr>';
+      if (!a.rows.length) { h += '<tr><td class="l mut" colspan="' + cols + '">보유하거나 목표로 잡은 종목이 없습니다.</td></tr>'; return; }
+      a.rows.forEach(function (x) {
+        h += '<tr class="' + (x.kind ? 'rk-' + x.kind : '') + '" data-acc="' + esc(a.id) + '" data-code="' + esc(x.code) + '"><td class="nm">' + esc(x.name) + '<span class="code">' + esc(x.code) + '</span></td><td class="l">' + kindTag(x.kind) + '</td><td>' + fInt(x.qty) + '</td>';
+        x.cells.forEach(function (cell) {
+          var t = '<span class="mut">·</span>', c = '';
+          if (cell && cell.held) t = '<span class="tag H">보류</span>';
+          else if (cell && cell.q) { t = fSigned(cell.q); c = cls(cell.q); }
+          h += '<td class="' + c + '">' + t + '</td>';
+        });
+        h += '<td><b>' + fInt(x.end) + '</b></td></tr>';
+      });
+    });
+    return h + '</tbody></table></div></section>';
+  }
+  function minRounds() {
+    var rs = S.plan.rounds, d = rs.filter(function (r) { return r.done; }).length;
+    return Math.max(1, d + (d && rs[d - 1].pct >= 100 ? 0 : 1));
   }
   function statusOf(k, cur) { return S.plan.rounds[k].done ? '완료' : (k === cur ? '다음 차례' : '예정'); }
   function viewPlan() {
@@ -1045,7 +1215,12 @@ dialog::backdrop { background: rgba(16,34,44,.45); }
       '<div class="route-wrap">' + routeSvg(pr, cur) + '</div>' +
       '<div class="route-leg"><span><i class="p"></i>계획 진행 ' + fP(pr.planned) + ' (완료한 회차 기준)</span><span><i class="a"></i>실제 진행 ' + fP(pr.pct) + ' (현재 잔고·현재가 기준)</span><span>남은 이동 금액 ' + fEok(pr.gap) + '</span></div></section>';
     // 회차 설정
-    h += '<section class="card"><header><h2>회차 설정</h2><span class="meta">누적 진행률은 목표까지의 격차를 몇 %까지 좁힐지입니다.</span></header><div class="scroll"><table class="t"><thead><tr><th class="c">회차</th><th>누적 진행률 %</th><th>이번 회차 이동</th><th class="l">예정일</th><th>납입금 합계</th><th>예상 매도</th><th>예상 매수</th><th>회차 후 남은 이동 금액</th><th class="c">상태</th></tr></thead><tbody>';
+    var doneN = rs.filter(function (x) { return x.done; }).length, minN = minRounds();
+    h += '<section class="card"><header><h2>회차 설정</h2><span class="meta">목표까지의 이동을 몇 번에 나눌지 정합니다 · 지금 ' + rs.length + '회</span></header>';
+    h += '<div class="seg-row"><span class="lab">회차 수</span><div class="seg" role="group" aria-label="회차 수 선택 (1~10회)">';
+    for (var n = 1; n <= 10; n++) h += '<button type="button" data-act="plan.n" data-n="' + n + '" aria-pressed="' + (n === rs.length) + '"' + (n < minN ? ' disabled' : '') + ' aria-label="' + n + '회로 나누기">' + n + '</button>';
+    h += '</div><span class="note">숫자를 누르면 ' + (doneN ? '완료한 ' + doneN + '개 회차는 그대로 두고 ' : '') + '남은 구간을 균등하게 나눕니다. 회차별 누적 진행률은 아래 표에서 직접 고칠 수 있습니다.</span></div>';
+    h += '<div class="scroll"><table class="t"><thead><tr><th class="c">회차</th><th>누적 진행률 %</th><th>이번 회차 이동</th><th class="l">예정일</th><th>납입금 합계</th><th>예상 매도</th><th>예상 매수</th><th>회차 후 남은 이동 금액</th><th class="c">상태</th></tr></thead><tbody>';
     var anyDep = false;
     rs.forEach(function (r, i) {
       var sm = SIM[i], last = i === rs.length - 1, dis = r.done ? ' disabled' : '';
@@ -1070,10 +1245,10 @@ dialog::backdrop { background: rgba(16,34,44,.45); }
       h += '</tr>';
     });
     h += '</tbody></table></div></details>';
-    h += '<div class="inline-set"><label>회차 수 <input type="number" min="1" max="12" step="1" id="planN" data-k="pn" value="' + rs.length + '"></label>' +
-      '<button class="btn sm" data-act="plan.n">균등 분할로 다시 나누기</button>' +
-      (S.history.length || rs.some(function (r) { return r.done; }) ? '<button class="btn sm" data-act="plan.restart">새 계획으로 다시 시작</button>' : '') +
-      '<span class="note">완료한 회차는 그대로 두고 남은 구간만 다시 나눕니다. 예상 금액은 앞 회차가 계획대로 체결된다고 보고 현재가로 계산한 값입니다.</span></div></section>';
+    h += '<div class="inline-set">' +
+      (S.history.length || doneN ? '<button class="btn sm" data-act="plan.restart">새 계획으로 다시 시작</button>' : '') +
+      '<span class="note">누적 진행률은 목표까지의 격차를 몇 %까지 좁힐지입니다. 예상 금액은 앞 회차가 계획대로 체결된다고 보고 현재가로 계산한 값입니다.</span></div></section>';
+    h += scheduleCard(cur);
     // 주문표
     var item = SIM[k], r = rs[k];
     h += '<div class="ord-head"><h2>주문표</h2><div class="chips" role="group" aria-label="회차 선택">' + rs.map(function (x, i) {
@@ -1088,6 +1263,7 @@ dialog::backdrop { background: rgba(16,34,44,.45); }
       return h;
     }
     h += '<p class="note" style="margin:0 0 10px">' + (k + 1) + '회차는 목표까지 남은 격차의 <b>' + fPct(item.f) + '</b>를 옮깁니다. 매도 <b>' + fEok(item.sellAmt) + '</b>, 매수 <b>' + fEok(item.buyAmt) + '</b>' + (item.deposit ? ', 납입금 <b>' + fEok(item.deposit) + '</b>' : '') + (item.held ? ', 가격 조건으로 보류 <b>' + item.held + '건</b>' : '') + '. ' + (k !== cur ? '앞 회차가 계획대로 체결된 뒤의 예상입니다.' : '주문은 매도 → 매수 순서로 내십시오.') + '</p>';
+    var kinds = kindMap();
     item.accounts.forEach(function (a) {
       var p = a.plan;
       h += '<section class="card"><header><h3>' + esc(a.name) + '</h3>';
@@ -1097,12 +1273,16 @@ dialog::backdrop { background: rgba(16,34,44,.45); }
       h += '</header>';
       if (a.risk && p.riskAfter > num(S.settings.riskLimit) + 1e-9) h += '<div class="pad" style="padding-bottom:0"><div class="alert bad" style="margin:0">회차 후 위험자산 비중이 한도를 넘습니다. 위험자산 매수 주문이 거부될 수 있으니 목표 비중이나 안전자산 표시를 확인하십시오.</div></div>';
       if (!p.orders.length) { h += '<div class="pad note">이번 회차에 낼 주문이 없습니다.</div></section>'; return; }
-      h += '<div class="scroll"><table class="t"><thead><tr><th class="c">구분</th><th class="l">종목</th><th>수량</th><th>현재가</th><th>예상 금액</th><th>비중: 현재 → 회차 후 (목표)</th><th class="l">비고</th></tr></thead><tbody>';
+      h += '<div class="scroll"><table class="t ord"><thead><tr><th class="l">종목</th><th class="l">구분</th><th>회차 전 보유</th><th>매도</th><th>매수</th><th>회차 후 보유</th><th>현재가</th><th>예상 금액</th><th>비중: 현재 → 회차 후 (목표)</th><th class="l">비고</th></tr></thead><tbody>';
       p.orders.forEach(function (o) {
-        var side = o.held ? 'H' : o.side;
-        h += '<tr><td class="c"><span class="tag ' + side + '">' + (o.held ? '보류' : (o.side === 'S' ? '매도' : '매수')) + '</span></td>' +
-          '<td class="nm">' + esc(o.name) + '<span class="code">' + esc(o.code) + '</span></td>' +
-          '<td>' + (o.held && !o.qty ? '<span class="mut">–</span>' : fInt(o.qty)) + '</td><td>' + fInt(o.price) + '</td><td>' + (o.held && !o.amount ? '<span class="mut">–</span>' : fInt(o.amount)) + '</td>' +
+        var kind = (kinds[a.id] || {})[o.code] || '';
+        var hold = '<span class="tag H">보류</span>' + (o.qty ? ' <span class="mut">' + ju(o.qty) + '</span>' : '');
+        var sell = o.side === 'S' ? (o.held ? hold : '<b class="neg">' + ju(o.qty) + '</b>') : '';
+        var buy = o.side === 'B' ? (o.held ? hold : '<b class="pos">' + ju(o.qty) + '</b>') : '';
+        h += '<tr class="' + (kind ? 'rk-' + kind : '') + '" data-code="' + esc(o.code) + '"><td class="nm">' + esc(o.name) + '<span class="code">' + esc(o.code) + '</span></td>' +
+          '<td class="l">' + kindTag(kind) + '</td>' +
+          '<td>' + ju(o.have) + '</td><td>' + sell + '</td><td>' + buy + '</td><td><b>' + ju(o.left) + '</b></td>' +
+          '<td>' + fInt(o.price) + '</td><td>' + (o.held && !o.amount ? '<span class="mut">–</span>' : fInt(o.amount)) + '</td>' +
           '<td class="w3">' + fPct(o.curW) + ' → <b>' + fPct(o.aftW) + '</b> (' + fPct(o.tgtW) + ')</td>' +
           '<td class="l mut">' + (o.held ? (o.side === 'S' ? '매도 보류: ' : (o.side === 'B' ? '매수 보류: ' : '')) : '') + esc(o.reason || '') + '</td></tr>';
       });
@@ -1375,21 +1555,28 @@ dialog::backdrop { background: rgba(16,34,44,.45); }
         X.utils.book_append_sheet(wb, ws, name);
       };
       var N = '#,##0', P = '0.0%';
-      var a1 = [['계좌', '섹터', 'ETF 코드', '종목', '현재가', '보유수량', '평가금액', '현재 %', '목표 %', '목표금액', '목표수량', '조정(주/원)']];
+      var kName = function (kind) { for (var i = 0; i < KINDS.length; i++) if (KINDS[i][0] === kind) return KINDS[i][1]; return ''; };
+      var a1 = [['계좌', '섹터', 'ETF 코드', '종목', '현재가', '보유수량', '평가금액', '현재 %', '목표 %', '목표금액', '목표수량', '조정(주/원)', '구분']];
       ALL.accounts.forEach(function (c) {
-        c.rows.forEach(function (r) { a1.push([c.name, r.sector, r.code, r.name, r.price, r.qty, r.value, r.curW, r.target / 100, r.tgtAmt, r.tgtQty, r.adj]); });
+        c.rows.forEach(function (r) { a1.push([c.name, r.sector, r.code, r.name, r.price, r.qty, r.value, r.curW, r.target / 100, r.tgtAmt, r.tgtQty, r.adj, kName(r.kind)]); });
         a1.push([c.name, '합계', '', '', null, null, c.total, 1, c.sumTarget / 100, c.total * c.sumTarget / 100, null, null]);
       });
-      add('잔고·목표', a1, { 4: N, 5: N, 6: N, 7: P, 8: P, 9: N, 10: '#,##0.0', 11: N }, [16, 10, 10, 34, 10, 12, 15, 8, 8, 15, 12, 12]);
-      var a2 = [['회차', '누적 진행률', '예정일', '계좌', '구분', 'ETF 코드', '종목', '수량', '현재가', '예상 금액', '현재 %', '회차 후 %', '목표 %', '비고']];
+      add('잔고·목표', a1, { 4: N, 5: N, 6: N, 7: P, 8: P, 9: N, 10: '#,##0.0', 11: N }, [16, 10, 10, 34, 10, 12, 15, 8, 8, 15, 12, 12, 10]);
+      var a2 = [['회차', '누적 진행률', '예정일', '계좌', '구분', 'ETF 코드', '종목', '수량', '현재가', '예상 금액', '현재 %', '회차 후 %', '목표 %', '비고', '회차 전 보유', '회차 후 보유']];
       SIM.forEach(function (it) {
         if (it.done) return;
         it.accounts.forEach(function (a) {
           if (!a.plan.ok) return;
-          a.plan.orders.forEach(function (o) { a2.push([it.k + 1, it.pct / 100, it.date, a.name, o.held ? '보류' : (o.side === 'S' ? '매도' : '매수'), o.code, o.name, o.qty, o.price, o.amount, o.curW, o.aftW, o.tgtW, o.reason || '']); });
+          a.plan.orders.forEach(function (o) { a2.push([it.k + 1, it.pct / 100, it.date, a.name, o.held ? '보류' : (o.side === 'S' ? '매도' : '매수'), o.code, o.name, o.qty, o.price, o.amount, o.curW, o.aftW, o.tgtW, o.reason || '', o.have, o.left]); });
         });
       });
-      add('주문표(남은 회차)', a2, { 1: P, 7: N, 8: N, 9: N, 10: P, 11: P, 12: P }, [6, 10, 11, 16, 6, 10, 34, 10, 10, 15, 8, 9, 8, 36]);
+      add('주문표(남은 회차)', a2, { 1: P, 7: N, 8: N, 9: N, 10: P, 11: P, 12: P, 14: N, 15: N }, [6, 10, 11, 16, 6, 10, 34, 10, 10, 15, 8, 9, 8, 36, 12, 12]);
+      var nR = S.plan.rounds.length, a6 = [['계좌', '구분', 'ETF 코드', '종목', '지금 보유'].concat(S.plan.rounds.map(function (r, i) { return (i + 1) + '회차' + (r.done ? '(완료)' : ''); }), ['일정 후 보유'])], fm6 = { 4: N };
+      for (var ci = 0; ci <= nR; ci++) fm6[5 + ci] = N;
+      RB.schedule(S, SIM).forEach(function (a) {
+        a.rows.forEach(function (x) { a6.push([a.name, kName(x.kind), x.code, x.name, x.qty].concat(x.cells.map(function (cell) { return cell ? (cell.held ? '보류' : cell.q) : null; }), [x.end])); });
+      });
+      add('회차별 수량', a6, fm6, [16, 10, 10, 34, 11].concat(S.plan.rounds.map(function () { return 9; }), [12]));
       var a3 = [['섹터', '현재 평가금액', '현재 %', '목표금액', '목표 %']];
       ALL.sectors.forEach(function (s) { a3.push([s.sector, s.curAmt, s.curW, s.tgtAmt, s.tgtW]); });
       a3.push(['전체 합계', ALL.total, 1, ALL.tgtTotal, 1]);
@@ -1416,7 +1603,7 @@ dialog::backdrop { background: rgba(16,34,44,.45); }
   /* ---------- 동작 ---------- */
   function replan(n) {
     var rs = S.plan.rounds, done = rs.filter(function (r) { return r.done; });
-    n = RB.clamp(Math.round(num(n)) || rs.length, Math.max(1, done.length + (done.length && done[done.length - 1].pct >= 100 ? 0 : 1)), 12);
+    n = RB.clamp(Math.round(num(n)) || rs.length, minRounds(), 12);
     var base = done.length ? done[done.length - 1].pct : 0, rem = n - done.length, out = done.slice();
     for (var j = 1; j <= rem; j++) {
       var old = rs[done.length + j - 1];
@@ -1468,7 +1655,7 @@ dialog::backdrop { background: rgba(16,34,44,.45); }
     'plan.pct': function (el) { S.plan.rounds[+el.dataset.r].pct = num(el.value); fixPcts(S.plan); },
     'plan.date': function (el) { S.plan.rounds[+el.dataset.r].date = /^\d{4}-\d{2}-\d{2}$/.test(el.value) ? el.value : ''; },
     'plan.dep': function (el) { var r = S.plan.rounds[+el.dataset.r], id = S.accounts[+el.dataset.a].id, v = Math.max(0, num(el.value)); if (v) r.deposits[id] = v; else delete r.deposits[id]; },
-    'plan.n': function () { replan(($('#planN') || {}).value); },
+    'plan.n': function (el) { replan(el.dataset.n); toast('남은 구간을 ' + S.plan.rounds.length + '회로 균등하게 나눴습니다.'); },
     'plan.sel': function (el) { ui.round = +el.dataset.r; },
     'plan.base': function () { RB.setBaseline(S); toast('지금 잔고를 새 기준으로 삼았습니다.'); },
     'plan.restart': function () {
