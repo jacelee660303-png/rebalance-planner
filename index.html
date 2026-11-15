@@ -1196,11 +1196,14 @@ dialog::backdrop { background: rgba(16,34,44,.45); }
     if (q.length < 2) { box.innerHTML = ''; return; }
     var have = {}, out = [], map = S.quotes.map;
     S.tickers.forEach(function (t) { have[t.code] = 1; });
-    Object.keys(map).some(function (code) {
-      var n = String(map[code].n || '');
-      if (code.indexOf(q) >= 0 || n.toUpperCase().indexOf(q) >= 0) out.push({ code: code, n: n, p: map[code].p });
-      return out.length >= 12;
+    var qn = q.replace(/\s+/g, '');
+    Object.keys(map).forEach(function (code) {
+      var n = String(map[code].n || ''), un = n.toUpperCase().replace(/\s+/g, ''), at = un.indexOf(qn);
+      if (code.indexOf(qn) < 0 && at < 0) return;
+      out.push({ code: code, n: n, p: map[code].p, rank: code === qn || un === qn ? 0 : (at === 0 ? 1 : 2) });
     });
+    out.sort(function (a, b) { return a.rank - b.rank || a.n.length - b.n.length || (a.n < b.n ? -1 : 1); });
+    out = out.slice(0, 12);
     var code6 = RB.normCode(q);
     if (code6 && code6 !== CASH && q.length === 6 && !map[code6]) out.unshift({ code: code6, n: '목록에 없는 코드 (시세는 다음 조회 때 확인)', p: null });
     box.innerHTML = out.length ? out.map(function (o) {
