@@ -735,7 +735,7 @@ dialog::backdrop { background: rgba(16,34,44,.45); }
   }
 
   var S = load();
-  var ui = { tab: 'hold', round: null, depOpen: false };
+  var ui = { tab: 'hold', round: null, depOpen: false, tkQ: '', tkSec: '' };
   var ALL = null, SIM = null;
 
   /* ---------- 표기 ---------- */
@@ -937,10 +937,12 @@ dialog::backdrop { background: rgba(16,34,44,.45); }
     dirtyQuotes = false;
     ALL = RB.calcAll(S);
     SIM = RB.simulate(S);
-    var a = document.activeElement, key = a && a.dataset ? a.dataset.k : null;
+    var a = document.activeElement, key = a && a.dataset ? a.dataset.k : null, caret = null;
+    try { if (key && a.type !== 'number' && a.selectionStart != null) caret = [a.selectionStart, a.selectionEnd]; } catch (e) { caret = null; }
     renderFeed(); renderKpis(); renderTabs();
     $('#view').innerHTML = VIEWS[ui.tab]();
-    if (key) { var el = document.querySelector('[data-k="' + key.replace(/"/g, '') + '"]'); if (el) el.focus(); }
+    if (ui.tab === 'tk' && ui.tkQ) searchTickers(ui.tkQ);
+    if (key) { var el = document.querySelector('[data-k="' + key.replace(/"/g, '') + '"]'); if (el) { el.focus(); if (caret) { try { el.setSelectionRange(caret[0], caret[1]); } catch (e) { /* 선택 범위를 지원하지 않는 입력칸 */ } } } }
   }
 
   /* ----- 잔고·목표 ----- */
@@ -1166,8 +1168,8 @@ dialog::backdrop { background: rgba(16,34,44,.45); }
   /* ----- 종목 목록 ----- */
   function viewTk() {
     var h = '<section class="card"><header><h2>종목 추가</h2><span class="meta">네이버 ETF 목록에서 검색합니다. 섹터를 고른 뒤 종목을 누르십시오.</span></header><div class="tk-add">' +
-      '<input id="tkQ" type="search" placeholder="종목명 또는 코드 (예: 금현물, 0072R0)" autocomplete="off" aria-label="종목 검색">' +
-      '<select id="tkSec" aria-label="추가할 섹터">' + SECTORS.map(function (s) { return '<option>' + s + '</option>'; }).join('') + '</select>' +
+      '<input id="tkQ" type="search" data-k="tkq" value="' + esc(ui.tkQ) + '" placeholder="종목명 또는 코드 (예: 금현물, 0072R0)" autocomplete="off" aria-label="종목 검색">' +
+      '<select id="tkSec" aria-label="추가할 섹터">' + SECTORS.map(function (s) { return '<option' + (s === ui.tkSec ? ' selected' : '') + '>' + s + '</option>'; }).join('') + '</select>' +
       '<div class="tk-res" id="tkRes"></div></div></section>';
     h += '<section class="card"><header><h2>등록 종목</h2><span class="meta">안전자산 표시는 IRP 위험자산 한도 점검에 쓰입니다. 증권사 앱의 표기로 확인하십시오. 매도 하한가·매수 상한가는 비워 두면 조건 없이 주문합니다.</span></header>';
     if (!S.tickers.length) return h + '<div class="pad note">등록된 종목이 없습니다. 위에서 검색해 추가하거나 엑셀을 불러오십시오.</div></section>';
@@ -1519,9 +1521,10 @@ dialog::backdrop { background: rgba(16,34,44,.45); }
     var t = e.target;
     if (t.id === 'fileXlsx') { if (t.files[0]) importXlsx(t.files[0]); t.value = ''; return; }
     if (t.id === 'fileJson') { if (t.files[0]) importJson(t.files[0]); t.value = ''; return; }
+    if (t.id === 'tkSec') { ui.tkSec = t.value; return; }
     if (t.dataset && t.dataset.act && t.tagName !== 'BUTTON' && t.closest('#view')) run(t);
   });
-  document.addEventListener('input', function (e) { if (e.target.id === 'tkQ') searchTickers(e.target.value); });
+  document.addEventListener('input', function (e) { if (e.target.id === 'tkQ') { ui.tkQ = e.target.value; searchTickers(e.target.value); } });
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Enter' && e.target.tagName === 'INPUT' && e.target.closest('#view') && e.target.type !== 'checkbox') e.target.blur();
   });
